@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>20 лютого — День памʼяті Героїв Небесної Сотні</title>
+
+<style>
+* { margin:0; padding:0; box-sizing:border-box }
+
+body {
+    font-family: system-ui, -apple-system, sans-serif;
+    background: linear-gradient(180deg,#1e3c72,#2a5298);
+    min-height:100vh;
+    padding:10px;
+    color:#111;
+}
+
+/* MOBILE FIX */
+.word-grid, .cell {
+    touch-action:none;
+    user-select:none;
+}
+
+.container {
+    max-width:1200px;
+    margin:auto;
+}
+
+/* HEADER */
+header {
+    display:flex;
+    align-items:center;
+    gap:10px;
+    background:rgba(255,255,255,.12);
+    backdrop-filter: blur(6px);
+    padding:14px;
+    border-radius:14px;
+    margin-bottom:12px;
+}
+
+header h1 {
+    color:#fff;
+    font-size:17px;
+    font-weight:700;
+    line-height:1.3;
+    flex:1;
+}
+
+.stats-box {
+    color:#fff;
+    font-weight:700;
+    white-space:nowrap;
+}
+
+.stats-box span { color:#ffd700 }
+
+.header-btn {
+    padding:6px 10px;
+    border:none;
+    border-radius:8px;
+    font-weight:600;
+    font-size:14px;
+    background:#e0e0e0;
+    cursor:pointer;
+}
+
+/* LAYOUT */
+.main-content {
+    display:grid;
+    grid-template-columns:1fr;
+    gap:12px;
+}
+
+/* GAME AREA */
+.game-area {
+    background:#fff;
+    border-radius:14px;
+    padding:14px;
+    display:flex;
+    justify-content:center;
+    overflow:auto;
+}
+
+/* GRID */
+.word-grid {
+    display:grid;
+    gap:3px;
+    padding:12px;
+    border:3px solid #2a5298;
+    border-radius:12px;
+    width:fit-content;
+}
+
+.cell {
+    min-width:40px;
+    min-height:40px;
+    aspect-ratio:1/1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:700;
+    font-size:18px;
+    border-radius:6px;
+    border:1px solid #bbb;
+    background:#fafafa;
+}
+
+.cell.selected {
+    background:#3f51b5;
+    color:#fff;
+}
+
+.cell.found {
+    background:#2e7d32;
+    color:#fff;
+}
+
+/* BOTTOM INFO */
+.bottom-info {
+    position:sticky;
+    bottom:0;
+    margin-top:12px;
+    background:rgba(255,255,255,.95);
+    border-radius:14px 14px 0 0;
+    padding:14px;
+    font-size:15px;
+    box-shadow:0 -6px 20px rgba(0,0,0,.15);
+    display:none;
+    z-index:5;
+}
+
+.bottom-info.show { display:block }
+
+.bottom-info button {
+    margin-top:10px;
+    width:100%;
+    padding:10px;
+    border:none;
+    border-radius:10px;
+    background:#ffb300;
+    font-weight:700;
+    cursor:pointer;
+}
+
+/* OVERLAY */
+.overlay {
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.5);
+    display:none;
+    z-index:10;
+}
+
+.overlay.show { display:block }
+
+.completion {
+    position:fixed;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+    background:#fff;
+    padding:30px;
+    border-radius:16px;
+    text-align:center;
+    z-index:11;
+    display:none;
+    max-width:90%;
+}
+
+.completion.show { display:block }
+
+.completion h2 {
+    color:#2e7d32;
+    margin-bottom:10px;
+}
+
+@media(min-width:768px){
+    .main-content {
+        grid-template-columns:1fr;
+    }
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+<header>
+  <h1>20 лютого — День памʼяті Героїв Небесної Сотні</h1>
+
+  <div class="stats-box">
+    <span id="foundCount">0</span>/<span id="totalCount">0</span>
+  </div>
+
+  <button class="header-btn" onclick="newGame()">🔄</button>
+</header>
+
+<div class="main-content">
+  <div class="game-area" id="gameArea"></div>
+
+  <div class="bottom-info" id="infoBox">
+    <p id="infoText">Виділи слово, провівши пальцем або мишею</p>
+    <button onclick="giveHint()">💡 Підказка</button>
+  </div>
+</div>
+</div>
+
+<div class="overlay" id="overlay"></div>
+<div class="completion" id="completion">
+  <h2>🕯 Дякуємо за памʼять</h2>
+  <p>Усі слова знайдено</p>
+  <p>⏱ Час: <span id="time"></span></p>
+  <button onclick="newGame()" class="header-btn">Спробувати ще</button>
+</div>
+
+<script>
+const CFG = {
+  rows:12,
+  cols:12,
+  words:[
+    'МАЙДАН','ПАМЯТЬ','РЕВОЛЮЦІЯ','ПРОТЕСТ',
+    'ВОЛЯ','СВІЧКА','СМІЛИВІСТЬ',
+    'ГІДНІСТЬ','ГЕРОЇ','СТУДЕНТИ'
+  ],
+  letters:'АБВГҐДЕЄЖЗИІЇЙКЛМНОПРСТУФХЦЧШЩЬЮЯ'
+};
+
+let grid=[], found=new Set(), selected=[], isSel=false, startTime;
+
+/* GRID */
+function gen(){
+  grid = Array(CFG.rows).fill().map(()=>Array(CFG.cols).fill(''));
+  CFG.words.forEach(w=>place(w));
+  fill();
+}
+
+function place(w){
+  for(let i=0;i<100;i++){
+    const h = Math.random()>.5;
+    const r = Math.floor(Math.random()*(h?CFG.rows:CFG.rows-w.length));
+    const c = Math.floor(Math.random()*(h?CFG.cols-w.length:CFG.cols));
+    let ok=true;
+    for(let j=0;j<w.length;j++){
+      const rr=r+(h?0:j), cc=c+(h?j:0);
+      if(grid[rr][cc] && grid[rr][cc]!=w[j]) ok=false;
+    }
+    if(!ok) continue;
+    for(let j=0;j<w.length;j++)
+      grid[r+(h?0:j)][c+(h?j:0)] = w[j];
+    return;
+  }
+}
+
+function fill(){
+  for(let r=0;r<CFG.rows;r++)
+    for(let c=0;c<CFG.cols;c++)
+      if(!grid[r][c])
+        grid[r][c]=CFG.letters[Math.floor(Math.random()*CFG.letters.length)];
+}
+
+/* RENDER */
+function render(){
+  const a=document.getElementById('gameArea');
+  const g=document.createElement('div');
+  g.className='word-grid';
+  g.style.gridTemplateColumns=`repeat(${CFG.cols},1fr)`;
+
+  grid.forEach((row,r)=>row.forEach((ch,c)=>{
+    const d=document.createElement('div');
+    d.className='cell';
+    d.textContent=ch;
+
+    d.onmousedown=()=>{isSel=true;clearSel();add(d)};
+    d.onmouseover=()=>isSel&&add(d);
+    d.onmouseup=endSel;
+
+    d.addEventListener('touchstart',e=>{
+      e.preventDefault();isSel=true;clearSel();add(cellFromTouch(e));
+    },{passive:false});
+    d.addEventListener('touchmove',e=>{
+      e.preventDefault();isSel&&add(cellFromTouch(e));
+    },{passive:false});
+    d.addEventListener('touchend',endSel);
+
+    g.appendChild(d);
+  }));
+
+  a.innerHTML='';
+  a.appendChild(g);
+
+  document.getElementById('totalCount').textContent=CFG.words.length;
+  document.getElementById('foundCount').textContent=found.size;
+  document.getElementById('infoBox').classList.add('show');
+}
+
+/* SELECTION */
+function cellFromTouch(e){
+  const t=e.touches[0];
+  const el=document.elementFromPoint(t.clientX,t.clientY);
+  return el?.classList.contains('cell')?el:null;
+}
+
+function add(c){
+  if(!c||selected.includes(c)) return;
+  selected.push(c);
+  c.classList.add('selected');
+}
+
+function clearSel(){
+  selected.forEach(c=>c.classList.remove('selected'));
+  selected=[];
+}
+
+function endSel(){
+  isSel=false;
+  check();
+}
+
+function check(){
+  const w=selected.map(c=>c.textContent).join('');
+  if(CFG.words.includes(w)&&!found.has(w)){
+    found.add(w);
+    selected.forEach(c=>c.classList.add('found'));
+    showInfo(`✅ Знайдено слово: ${w}`);
+    document.getElementById('foundCount').textContent=found.size;
+    if(found.size===CFG.words.length) finish();
+  }
+  clearSel();
+}
+
+/* INFO */
+function showInfo(text){
+  document.getElementById('infoText').textContent=text;
+  document.getElementById('infoBox').classList.add('show');
+}
+
+/* HINT */
+function giveHint(){
+  const w=CFG.words.find(x=>!found.has(x));
+  if(w) showInfo(`💡 Підказка: ${w}`);
+}
+
+/* FINISH */
+function finish(){
+  const t=Math.floor((Date.now()-startTime)/1000);
+  document.getElementById('time').textContent=
+    `${Math.floor(t/60)}:${(t%60).toString().padStart(2,'0')}`;
+  document.getElementById('overlay').classList.add('show');
+  document.getElementById('completion').classList.add('show');
+}
+
+/* GAME */
+function newGame(){
+  found.clear();
+  document.getElementById('overlay').classList.remove('show');
+  document.getElementById('completion').classList.remove('show');
+  startTime=Date.now();
+  gen();
+  render();
+}
+
+window.onload=newGame;
+</script>
+</body>
+</html>
