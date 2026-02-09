@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>🔐 Digital Safety Word Search - Choose Language</title>
+
+<style>
+* { margin:0; padding:0; box-sizing:border-box }
+
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;700&family=Nunito:wght@700;800&display=swap');
+
+body {
+    font-family: 'Fredoka', sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #4facfe 75%, #00f2fe 100%);
+    background-size: 400% 400%;
+    animation: gradientShift 15s ease infinite;
+    min-height: 100vh;
+    padding: 20px;
+    color: #111;
+    position: relative;
+    overflow-x: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    radial-gradient(circle at 20% 50%, rgba(255, 107, 157, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(0, 212, 255, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 40% 20%, rgba(240, 147, 251, 0.1) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* FLOATING EMOJIS BACKGROUND */
+.floating-items {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.float-item {
+  position: absolute;
+  font-size: 3em;
+  opacity: 0.15;
+  animation: float 20s infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-30px) rotate(10deg); }
+}
+
+.container {
+    max-width: 900px;
+    width: 100%;
+    position: relative;
+    z-index: 1;
+}
+
+/* HEADER */
+header {
+    text-align: center;
+    margin-bottom: 50px;
+    animation: slideDown 0.8s ease;
+}
+
+header h1 {
+    color: white;
+    font-family: 'Nunito', sans-serif;
+    font-size: 48px;
+    font-weight: 800;
+    line-height: 1.2;
+    text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.3);
+    margin-bottom: 15px;
+}
+
+header p {
+    color: rgba(255, 255, 255, 0.95);
+    font-size: 20px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    font-weight: 600;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* LANGUAGE SELECTION */
+.language-selector {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+    margin-bottom: 40px;
+    animation: fadeIn 0.8s ease 0.3s both;
+}
+
+.language-card {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(240, 250, 255, 0.95));
+    border-radius: 24px;
+    padding: 40px 30px;
+    text-align: center;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+    border: 4px solid rgba(255, 107, 157, 0.3);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.language-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 16px 50px rgba(0, 0, 0, 0.35);
+    border-color: rgba(255, 107, 157, 0.6);
+}
+
+.language-card:active {
+    transform: translateY(-5px);
+}
+
+.flag-emoji {
+    font-size: 80px;
+    margin-bottom: 20px;
+    animation: bounce 2s infinite;
+}
+
+.language-card:nth-child(1) .flag-emoji {
+    animation-delay: 0s;
+}
+
+.language-card:nth-child(2) .flag-emoji {
+    animation-delay: 0.3s;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-20px); }
+}
+
+.language-card h2 {
+    color: #667eea;
+    font-family: 'Nunito', sans-serif;
+    font-size: 32px;
+    font-weight: 800;
+    margin-bottom: 12px;
+}
+
+.language-card p {
+    color: #666;
+    font-size: 16px;
+    margin-bottom: 20px;
+    line-height: 1.5;
+}
+
+.play-button {
+    background: linear-gradient(135deg, #ff6b9d, #ffd700);
+    color: white;
+    border: none;
+    padding: 14px 32px;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 18px;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 4px 15px rgba(255, 107, 157, 0.4);
+    font-family: 'Nunito', sans-serif;
+}
+
+.play-button:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 20px rgba(255, 107, 157, 0.6);
+}
+
+.play-button:active {
+    transform: scale(0.95);
+}
+
+/* FEATURES */
+.features {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(240, 250, 255, 0.95));
+    border-radius: 24px;
+    padding: 40px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+    border: 4px solid rgba(0, 212, 255, 0.3);
+    animation: fadeIn 0.8s ease 0.6s both;
+}
+
+.features h3 {
+    color: #667eea;
+    font-family: 'Nunito', sans-serif;
+    font-size: 28px;
+    font-weight: 800;
+    margin-bottom: 25px;
+    text-align: center;
+}
+
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.feature-item {
+    display: flex;
+    gap: 15px;
+    align-items: flex-start;
+}
+
+.feature-icon {
+    font-size: 32px;
+    min-width: 50px;
+    text-align: center;
+}
+
+.feature-text {
+    flex: 1;
+}
+
+.feature-text h4 {
+    color: #333;
+    font-weight: 700;
+    margin-bottom: 5px;
+    font-size: 16px;
+}
+
+.feature-text p {
+    color: #666;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+/* FOOTER */
+footer {
+    text-align: center;
+    margin-top: 40px;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 14px;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+    animation: fadeIn 0.8s ease 0.9s both;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* RESPONSIVE */
+@media(max-width: 768px) {
+    header h1 {
+        font-size: 36px;
+    }
+
+    header p {
+        font-size: 16px;
+    }
+
+    .language-card {
+        padding: 30px 20px;
+    }
+
+    .language-card h2 {
+        font-size: 24px;
+    }
+
+    .flag-emoji {
+        font-size: 60px;
+    }
+
+    .features {
+        padding: 30px 20px;
+    }
+
+    .features h3 {
+        font-size: 22px;
+    }
+}
+</style>
+</head>
+
+<body>
+<div class="floating-items">
+  <div class="float-item" style="left: 5%; top: 10%; animation-delay: 0s;">🔐</div>
+  <div class="float-item" style="left: 15%; top: 60%; animation-delay: 2s;">💻</div>
+  <div class="float-item" style="left: 85%; top: 20%; animation-delay: 4s;">🛡️</div>
+  <div class="float-item" style="left: 80%; top: 70%; animation-delay: 6s;">📱</div>
+  <div class="float-item" style="left: 10%; top: 40%; animation-delay: 3s;">⚡</div>
+  <div class="float-item" style="left: 90%; top: 50%; animation-delay: 5s;">🌐</div>
+</div>
+
+<div class="container">
+    <header>
+        <h1>🔐 Digital Safety Word Search</h1>
+        <p>Choose your language and start playing!</p>
+    </header>
+
+    <div class="language-selector">
+        <a href="/fillword/digital-safety-ua.html" class="language-card">
+            <div class="flag-emoji">🇺🇦</div>
+            <h2>Українська</h2>
+            <p>Гра про цифрову безпеку українською мовою</p>
+            <button class="play-button">Грати →</button>
+        </a>
+
+        <a href="/fillword/digital-safety-en.html" class="language-card">
+            <div class="flag-emoji">🇬🇧</div>
+            <h2>English</h2>
+            <p>Digital safety word search game in English</p>
+            <button class="play-button">Play →</button>
+        </a>
+    </div>
+
+    <div class="features">
+        <h3>✨ What You'll Learn</h3>
+        <div class="features-grid">
+            <div class="feature-item">
+                <div class="feature-icon">🔐</div>
+                <div class="feature-text">
+                    <h4>Password Security</h4>
+                    <p>Learn how to create and protect strong passwords</p>
+                </div>
+            </div>
+
+            <div class="feature-item">
+                <div class="feature-icon">🎣</div>
+                <div class="feature-text">
+                    <h4>Spot Phishing</h4>
+                    <p>Recognize fake messages and suspicious links</p>
+                </div>
+            </div>
+
+            <div class="feature-item">
+                <div class="feature-icon">🛡️</div>
+                <div class="feature-text">
+                    <h4>Online Safety</h4>
+                    <p>Stay safe while using the internet and social media</p>
+                </div>
+            </div>
+
+            <div class="feature-item">
+                <div class="feature-icon">💻</div>
+                <div class="feature-text">
+                    <h4>Digital Hygiene</h4>
+                    <p>Keep your devices clean and virus-free</p>
+                </div>
+            </div>
+
+            <div class="feature-item">
+                <div class="feature-icon">🔍</div>
+                <div class="feature-text">
+                    <h4>Privacy Protection</h4>
+                    <p>Understand why privacy matters online</p>
+                </div>
+            </div>
+
+            <div class="feature-item">
+                <div class="feature-icon">🚀</div>
+                <div class="feature-text">
+                    <h4>Fun & Interactive</h4>
+                    <p>Learn through engaging word search games</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>🎮 Perfect for 5th graders learning about digital safety | Made with ❤️ for online education</p>
+    </footer>
+</div>
+
+</body>
+</html>
