@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>🔐 Digital Safety - Word Search Game</title>
+
+<style>
+* { margin:0; padding:0; box-sizing:border-box }
+
+:root {
+  --primary: #ff6b9d;
+  --secondary: #00d4ff;
+  --accent: #ffd700;
+  --success: #00ff88;
+  --danger: #ff4757;
+  --dark: #1a1a2e;
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;700&family=Nunito:wght@700;800&display=swap');
+
+body {
+    font-family: 'Fredoka', sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #4facfe 75%, #00f2fe 100%);
+    background-size: 400% 400%;
+    animation: gradientShift 15s ease infinite;
+    min-height: 100vh;
+    padding: 15px;
+    color: #111;
+    position: relative;
+    overflow-x: hidden;
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    radial-gradient(circle at 20% 50%, rgba(255, 107, 157, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(0, 212, 255, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 40% 20%, rgba(240, 147, 251, 0.1) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.container {
+    max-width: 1200px;
+    margin: auto;
+    position: relative;
+    z-index: 1;
+}
+
+/* FLOATING EMOJIS BACKGROUND */
+.floating-items {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.float-item {
+  position: absolute;
+  font-size: 3em;
+  opacity: 0.15;
+  animation: float 20s infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-30px) rotate(10deg); }
+}
+
+/* HEADER */
+header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    background: linear-gradient(135deg, rgba(255, 107, 157, 0.9), rgba(0, 212, 255, 0.9));
+    backdrop-filter: blur(10px);
+    padding: 18px;
+    border-radius: 20px;
+    margin-bottom: 15px;
+    border: 3px solid rgba(255, 255, 255, 0.5);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    animation: slideDown 0.6s ease;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+header h1 {
+    color: white;
+    font-family: 'Nunito', sans-serif;
+    font-size: 24px;
+    font-weight: 800;
+    line-height: 1.3;
+    flex: 1;
+    text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.3);
+}
+
+.stats-box {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.stat-item {
+    background: rgba(255, 255, 255, 0.9);
+    padding: 10px 16px;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 16px;
+    color: var(--dark);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+}
+
+.stat-item .number {
+    color: var(--primary);
+    font-size: 20px;
+    font-family: 'Nunito', sans-serif;
+}
+
+.header-btn {
+    padding: 10px 14px;
+    border: 3px solid white;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 18px;
+    background: linear-gradient(135deg, #ff6b9d, #ffd700);
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.header-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+.header-btn:active {
+    transform: scale(0.95);
+}
+
+/* LAYOUT */
+.main-content {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 15px;
+}
+
+/* GAME AREA */
+.game-area {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(240, 250, 255, 0.95));
+    border-radius: 24px;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+    animation: fadeIn 0.8s ease 0.2s both;
+    border: 4px solid rgba(255, 107, 157, 0.3);
+    backdrop-filter: blur(10px);
+    min-height: 500px;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* GRID */
+.word-grid {
+    display: grid;
+    gap: 4px;
+    padding: 16px;
+    border: 4px dashed var(--secondary);
+    border-radius: 16px;
+    width: fit-content;
+    background: linear-gradient(135deg, #f8f9ff 0%, #fff5f7 100%);
+    box-shadow: inset 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+.cell {
+    min-width: 45px;
+    min-height: 45px;
+    aspect-ratio: 1/1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 18px;
+    border-radius: 10px;
+    border: 2px solid #ddd;
+    background: linear-gradient(135deg, #ffffff 0%, #f0f4ff 100%);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    touch-action: none;
+    user-select: none;
+    font-family: 'Nunito', sans-serif;
+}
+
+.cell:hover:not(.selected):not(.found) {
+    border-color: var(--secondary);
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(0, 212, 255, 0.3);
+}
+
+.cell.selected {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: white;
+    border-color: var(--accent);
+    transform: scale(1.1);
+    box-shadow: 0 6px 20px rgba(255, 107, 157, 0.5);
+}
+
+.cell.found {
+    background: linear-gradient(135deg, #00ff88, #00d4ff);
+    color: white;
+    border-color: var(--success);
+    box-shadow: 0 6px 20px rgba(0, 255, 136, 0.5);
+    animation: popFound 0.4s ease;
+}
+
+@keyframes popFound {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+  100% { transform: scale(1); }
+}
+
+/* BOTTOM INFO */
+.bottom-info {
+    position: sticky;
+    bottom: 0;
+    margin-top: 15px;
+    background: linear-gradient(135deg, rgba(255, 107, 157, 0.95), rgba(0, 212, 255, 0.95));
+    border-radius: 20px;
+    padding: 16px;
+    font-size: 16px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+    display: none;
+    z-index: 5;
+    border: 3px solid rgba(255, 255, 255, 0.5);
+    animation: slideUp 0.4s ease;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.bottom-info.show { display: block }
+
+#infoText {
+    color: white;
+    font-weight: 700;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+    margin-bottom: 12px;
+}
+
+.bottom-info button {
+    margin-top: 10px;
+    width: 100%;
+    padding: 12px;
+    border: 3px solid white;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #ffd700, #ffb300);
+    font-weight: 700;
+    font-size: 16px;
+    color: #333;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    font-family: 'Nunito', sans-serif;
+}
+
+.bottom-info button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+.bottom-info button:active {
+    transform: translateY(0);
+}
+
+/* OVERLAY */
+.overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: none;
+    z-index: 10;
+    animation: fadeIn 0.3s ease;
+}
+
+.overlay.show { display: block }
+
+.completion {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: linear-gradient(135deg, #667eea, #764ba2, #f093fb);
+    padding: 40px 30px;
+    border-radius: 24px;
+    text-align: center;
+    z-index: 11;
+    display: none;
+    max-width: 90%;
+    width: 100%;
+    max-width: 500px;
+    border: 4px solid rgba(255, 255, 255, 0.5);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+    animation: popIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes popIn {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+  100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+
+.completion.show { display: block }
+
+.completion h2 {
+    color: var(--success);
+    margin-bottom: 15px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 32px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.completion p {
+    color: white;
+    font-size: 18px;
+    margin: 10px 0;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.completion button {
+    margin-top: 20px;
+    padding: 14px 24px;
+    border: 3px solid white;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #ffd700, #ffb300);
+    font-weight: 700;
+    font-size: 16px;
+    color: #333;
+    cursor: pointer;
+    transition: transform 0.2s;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    font-family: 'Nunito', sans-serif;
+}
+
+.completion button:hover {
+    transform: scale(1.05);
+}
+
+/* WORD LIST */
+.word-list {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(240, 250, 255, 0.95));
+    border-radius: 20px;
+    padding: 18px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+    border: 3px solid rgba(0, 212, 255, 0.3);
+    animation: fadeIn 0.8s ease 0.4s both;
+}
+
+.word-list h3 {
+    color: var(--primary);
+    font-family: 'Nunito', sans-serif;
+    font-size: 20px;
+    margin-bottom: 12px;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.words-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 10px;
+}
+
+.word-badge {
+    background: linear-gradient(135deg, #f8f9ff 0%, #fff5f7 100%);
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 2px solid #ddd;
+    font-weight: 600;
+    font-size: 14px;
+    text-align: center;
+    transition: all 0.3s ease;
+    color: var(--dark);
+}
+
+.word-badge.found {
+    background: linear-gradient(135deg, #00ff88, #00d4ff);
+    color: white;
+    border-color: var(--success);
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(0, 255, 136, 0.3);
+}
+
+/* MOBILE RESPONSIVE */
+@media(max-width: 600px) {
+    header h1 {
+        font-size: 18px;
+    }
+
+    .cell {
+        min-width: 38px;
+        min-height: 38px;
+        font-size: 16px;
+    }
+
+    .completion {
+        padding: 30px 20px;
+    }
+
+    .completion h2 {
+        font-size: 24px;
+    }
+}
+
+@media(min-width: 768px) {
+    .main-content {
+        grid-template-columns: 1fr;
+    }
+    
+    .word-list {
+        margin-top: 0;
+    }
+}
+</style>
+</head>
+
+<body>
+<div class="floating-items">
+  <div class="float-item" style="left: 5%; top: 10%; animation-delay: 0s;">🔐</div>
+  <div class="float-item" style="left: 15%; top: 60%; animation-delay: 2s;">💻</div>
+  <div class="float-item" style="left: 85%; top: 20%; animation-delay: 4s;">🛡️</div>
+  <div class="float-item" style="left: 80%; top: 70%; animation-delay: 6s;">📱</div>
+  <div class="float-item" style="left: 10%; top: 40%; animation-delay: 3s;">⚡</div>
+  <div class="float-item" style="left: 90%; top: 50%; animation-delay: 5s;">🌐</div>
+</div>
+
+<div class="container">
+<header>
+  <h1>🔐 Digital Safety - Word Search!</h1>
+
+  <div class="stats-box">
+    <div class="stat-item">
+      Found: <span class="number" id="foundCount">0</span>/<span id="totalCount">0</span>
+    </div>
+  </div>
+
+  <button class="header-btn" onclick="newGame()">🔄</button>
+</header>
+
+<div class="main-content">
+  <div class="game-area" id="gameArea"></div>
+
+  <div class="bottom-info" id="infoBox">
+    <p id="infoText">✨ Drag your finger or mouse across letters to find words!</p>
+    <button onclick="giveHint()">💡 Get a Hint</button>
+  </div>
+</div>
+</div>
+
+<div class="overlay" id="overlay"></div>
+<div class="completion" id="completion">
+  <h2>🎉 AWESOME!</h2>
+  <p>You found all the words!</p>
+  <p style="font-size: 24px; margin: 15px 0;">⏱ <span id="time"></span></p>
+  <button onclick="newGame()">Play Again!</button>
+</div>
+
+<script>
+const CFG = {
+  rows: 12,
+  cols: 12,
+  words: [
+    'PASSWORD',
+    'SECURE',
+    'PRIVACY',
+    'VIRUS',
+    'ONLINE',
+    'BROWSER',
+    'HACKER',
+    'SAFETY',
+    'DIGITAL',
+    'PROTECT',
+  ],
+  letters: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+};
+
+let grid = [], found = new Set(), selected = [], isSel = false, startTime;
+
+/* GRID */
+function gen() {
+  grid = Array(CFG.rows).fill().map(() => Array(CFG.cols).fill(''));
+  CFG.words.forEach(w => place(w));
+  fill();
+}
+
+function place(w) {
+  for (let i = 0; i < 100; i++) {
+    const h = Math.random() > 0.5;
+    const r = Math.floor(Math.random() * (h ? CFG.rows : CFG.rows - w.length));
+    const c = Math.floor(Math.random() * (h ? CFG.cols - w.length : CFG.cols));
+    let ok = true;
+    
+    for (let j = 0; j < w.length; j++) {
+      const rr = r + (h ? 0 : j), cc = c + (h ? j : 0);
+      if (grid[rr][cc] && grid[rr][cc] != w[j]) ok = false;
+    }
+    
+    if (!ok) continue;
+    for (let j = 0; j < w.length; j++)
+      grid[r + (h ? 0 : j)][c + (h ? j : 0)] = w[j];
+    return;
+  }
+}
+
+function fill() {
+  for (let r = 0; r < CFG.rows; r++)
+    for (let c = 0; c < CFG.cols; c++)
+      if (!grid[r][c])
+        grid[r][c] = CFG.letters[Math.floor(Math.random() * CFG.letters.length)];
+}
+
+/* RENDER */
+function render() {
+  const a = document.getElementById('gameArea');
+  const g = document.createElement('div');
+  g.className = 'word-grid';
+  g.style.gridTemplateColumns = `repeat(${CFG.cols}, 1fr)`;
+
+  grid.forEach((row, r) => row.forEach((ch, c) => {
+    const d = document.createElement('div');
+    d.className = 'cell';
+    d.textContent = ch;
+
+    d.onmousedown = () => { isSel = true; clearSel(); add(d); };
+    d.onmouseover = () => isSel && add(d);
+    d.onmouseup = endSel;
+
+    d.addEventListener('touchstart', e => {
+      e.preventDefault();
+      isSel = true;
+      clearSel();
+      add(cellFromTouch(e));
+    }, { passive: false });
+
+    d.addEventListener('touchmove', e => {
+      e.preventDefault();
+      isSel && add(cellFromTouch(e));
+    }, { passive: false });
+
+    d.addEventListener('touchend', endSel);
+
+    g.appendChild(d);
+  }));
+
+  a.innerHTML = '';
+  a.appendChild(g);
+
+  document.getElementById('totalCount').textContent = CFG.words.length;
+  document.getElementById('infoBox').classList.add('show');
+}
+
+/* SELECTION */
+function cellFromTouch(e) {
+  const t = e.touches[0];
+  const el = document.elementFromPoint(t.clientX, t.clientY);
+  return el?.classList.contains('cell') ? el : null;
+}
+
+function add(c) {
+  if (!c || selected.includes(c)) return;
+  selected.push(c);
+  c.classList.add('selected');
+}
+
+function clearSel() {
+  selected.forEach(c => c.classList.remove('selected'));
+  selected = [];
+}
+
+function endSel() {
+  isSel = false;
+  check();
+}
+
+function check() {
+  const w = selected.map(c => c.textContent).join('');
+  if (CFG.words.includes(w) && !found.has(w)) {
+    found.add(w);
+    selected.forEach(c => c.classList.add('found'));
+    showInfo(`✅ Found: <strong>${w}</strong>!`);
+    document.getElementById('foundCount').textContent = found.size;
+    
+    if (found.size === CFG.words.length) finish();
+  }
+  clearSel();
+}
+
+/* INFO */
+function showInfo(text) {
+  document.getElementById('infoText').innerHTML = text;
+  document.getElementById('infoBox').classList.add('show');
+}
+
+/* HINT */
+function giveHint() {
+  const w = CFG.words.find(x => !found.has(x));
+  if (w) showInfo(`💡 <strong>Hint:</strong> ${w}`);
+}
+
+/* FINISH */
+function finish() {
+  const t = Math.floor((Date.now() - startTime) / 1000);
+  const minutes = Math.floor(t / 60);
+  const seconds = (t % 60).toString().padStart(2, '0');
+  document.getElementById('time').textContent = `${minutes}:${seconds}`;
+  
+  document.getElementById('overlay').classList.add('show');
+  document.getElementById('completion').classList.add('show');
+}
+
+/* GAME */
+function newGame() {
+  found.clear();
+  document.getElementById('foundCount').textContent = found.size;
+  document.getElementById('overlay').classList.remove('show');
+  document.getElementById('completion').classList.remove('show');
+  startTime = Date.now();
+  gen();
+  render();
+}
+
+window.onload = newGame;
+</script>
+</body>
+</html>
