@@ -146,6 +146,39 @@
             font-size: 4em;
             animation: bounce 2s infinite;
         }
+
+        
+        .play-button-container {
+            text-align: center;
+            margin-top: 50px;
+            margin-bottom: 40px;
+            animation: slideUp 0.8s ease;
+        }
+
+        .play-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            color: white;
+            padding: 20px 55px;
+            border-radius: 20px;
+            font-size: 1.4em;
+            font-weight: 800;
+            text-decoration: none;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+            transition: all 0.3s ease;
+            border: 3px solid rgba(255, 255, 255, 0.5);
+            font-family: 'Nunito', 'Arial Rounded MT Bold', sans-serif;
+            cursor: pointer;
+        }
+
+        .play-button:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.6);
+        }
+
+        .play-button:active {
+            transform: translateY(-2px);
+        }
         
         @keyframes slideDown {
             from {
@@ -409,6 +442,12 @@
             <p style="margin-top: 20px; font-size: 0.95em;">
                 ✨ Якщо щось трапилось — розповідь дорослому! ✨
             </p>
+        </div>
+
+        <div class="play-button-container">
+            <a href="/fillword/play.html" class="play-button">
+                🎮 Шукати слова! 🎮
+            </a>
         </div>
     </div>
 </body>
